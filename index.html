@@ -1,0 +1,1789 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KOMPAS - Sistem Informasi Pelatihan & Karir</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Modern Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Chart.js untuk Grafik Statistik -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .hidden-panel { display: none !important; }
+        .glass-panel { background: rgba(255, 255, 255, 0.97); backdrop-filter: blur(12px); }
+        .elegant-shadow { box-shadow: 0 12px 35px -10px rgba(15, 23, 42, 0.15); }
+        .hover-lift { transition: transform 0.25s ease, box-shadow 0.25s ease; }
+        .hover-lift:hover { transform: translateY(-3px); box-shadow: 0 20px 40px -12px rgba(15, 23, 42, 0.2); }
+        
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col selection:bg-blue-900 selection:text-white">
+
+    <!-- Navigasi Atas -->
+    <nav class="bg-slate-900 text-slate-100 shadow-2xl sticky top-0 z-40 border-b-4 border-blue-800">
+        <div class="w-full px-6 lg:px-10">
+            <div class="flex justify-between h-20 items-center">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-gradient-to-br from-blue-700 to-blue-900 p-2.5 rounded-xl shadow-inner border border-blue-600">
+                        <i class="fa-solid fa-compass-drafting text-2xl text-white"></i>
+                    </div>
+                    <div>
+                        <span class="font-black text-2xl tracking-wider text-white block leading-none">KOMPAS</span>
+                        <span class="text-[10px] text-blue-300 tracking-widest font-bold uppercase mt-1 block">Kolaborasi Optimalisasi Pelatihan Adaptif dan Strategis</span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="https://pelatihan.kemnaker.go.id" target="_blank" class="hidden md:flex items-center text-slate-300 hover:text-white transition font-semibold text-xs tracking-wide bg-slate-800/80 px-3.5 py-2 rounded-lg border border-slate-700">
+                        <i class="fa-solid fa-globe mr-2 text-blue-400"></i> Kemnaker Web
+                    </a>
+                    <span id="user-role-display" class="font-bold text-blue-400 text-sm"></span>
+                    <button id="btn-login-modal" onclick="toggleModal('login-modal')" class="bg-gradient-to-r from-blue-700 to-blue-900 text-white px-5 py-2.5 rounded-lg font-bold hover:from-blue-600 hover:to-blue-800 shadow-md transition hover-lift text-sm border border-blue-600 flex items-center">
+                        <i class="fa-solid fa-right-to-bracket mr-2"></i>Login Admin
+                    </button>
+                    <button id="btn-logout" onclick="logout()" class="hidden bg-slate-800 text-red-400 px-5 py-2.5 rounded-lg font-bold hover:bg-red-950/40 hover:text-red-300 shadow-md transition text-sm border border-slate-700 flex items-center">
+                        <i class="fa-solid fa-right-from-bracket mr-2"></i>Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- KONTEN UTAMA DENGAN SIDEBAR MUNDUR KE KIRI -->
+    <div class="flex-grow w-full px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- AREA PUBLIK -->
+        <main id="public-area" class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            
+            <!-- Sidebar Panel Navigasi -->
+            <aside class="lg:col-span-3 xl:col-span-2 bg-white p-4 rounded-2xl elegant-shadow border border-slate-200/80 sticky top-28 space-y-2">
+                <div class="px-4 py-2 mb-2 border-b border-slate-100">
+                    <span class="text-[11px] font-black uppercase tracking-widest text-slate-400 block">Menu Utama</span>
+                </div>
+                <button onclick="switchTab('panel-1', this)" class="tab-btn w-full text-left px-4 py-3 rounded-xl font-bold text-blue-900 bg-blue-50 border-l-4 border-blue-900 transition-all text-xs flex items-center shadow-sm">
+                    <i class="fa-solid fa-graduation-cap mr-3 text-blue-800 text-base w-5 text-center"></i>Info Pelatihan
+                </button>
+                <button onclick="switchTab('panel-2', this)" class="tab-btn w-full text-left px-4 py-3 rounded-xl font-semibold text-slate-600 hover:text-blue-900 hover:bg-slate-50 border-l-4 border-transparent transition-all text-xs flex items-center">
+                    <i class="fa-solid fa-file-signature mr-3 text-slate-400 text-base w-5 text-center"></i>Pendaftaran
+                </button>
+                <button onclick="switchTab('panel-3', this)" class="tab-btn w-full text-left px-4 py-3 rounded-xl font-semibold text-slate-600 hover:text-blue-900 hover:bg-slate-50 border-l-4 border-transparent transition-all text-xs flex items-center">
+                    <i class="fa-solid fa-briefcase mr-3 text-slate-400 text-base w-5 text-center"></i>Bursa Kerja
+                </button>
+                <button onclick="switchTab('panel-4', this)" class="tab-btn w-full text-left px-4 py-3 rounded-xl font-semibold text-slate-600 hover:text-blue-900 hover:bg-slate-50 border-l-4 border-transparent transition-all text-xs flex items-center">
+                    <i class="fa-solid fa-user-graduate mr-3 text-slate-400 text-base w-5 text-center"></i>Alumni
+                </button>
+                <button onclick="switchTab('panel-5', this)" class="tab-btn w-full text-left px-4 py-3 rounded-xl font-semibold text-slate-600 hover:text-blue-900 hover:bg-slate-50 border-l-4 border-transparent transition-all text-xs flex items-center">
+                    <i class="fa-solid fa-comments mr-3 text-slate-400 text-base w-5 text-center"></i>Pengaduan
+                </button>
+            </aside>
+
+            <!-- Konten Panel Sebelah Kanan -->
+            <div class="lg:col-span-9 xl:col-span-10 space-y-8">
+                
+                <!-- Panel 1: Info Pelatihan & Statistik -->
+                <div id="panel-1" class="panel-content fade-in space-y-10">
+                    <div>
+                        <div class="mb-6">
+                            <h2 class="text-3xl font-black text-slate-900 tracking-tight">Program Kejuruan & Pelatihan</h2>
+                            <p class="text-slate-500 text-sm mt-1">Klik salah satu program kejuruan untuk melihat informasi detail dan brosur kegiatan.</p>
+                        </div>
+                        <div id="training-list" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"></div>
+                    </div>
+
+                    <!-- Grafik Statistik -->
+                    <div class="glass-panel p-6 sm:p-8 rounded-2xl elegant-shadow border border-slate-200/80 bg-gradient-to-b from-white to-slate-50">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 pb-4 border-b border-slate-200 gap-4">
+                            <div class="flex items-center space-x-3">
+                                <div class="p-3 bg-blue-900 text-white rounded-xl shadow-md">
+                                    <i class="fa-solid fa-chart-column text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-black text-slate-900 tracking-tight">Statistik Peserta Terlatih Per Kabupaten</h3>
+                                    <p class="text-[11px] text-slate-500 uppercase tracking-widest font-bold mt-0.5">Data sebaran alumni dan peserta diklat binaan</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 gap-6">
+                            <div class="relative w-full h-80 bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+                                <canvas id="publicTraineeChart"></canvas>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="bg-gradient-to-br from-blue-900 to-blue-950 text-white p-5 rounded-xl shadow-md border border-blue-800">
+                                    <span class="text-xs text-blue-300 font-bold uppercase tracking-wider block mb-1">Total Peserta Terlatih</span>
+                                    <h4 id="total-trainee-count" class="text-3xl font-black tracking-tight">0</h4>
+                                    <p class="text-[11px] text-slate-300 mt-1">Akumulasi seluruh peserta diklat kejuruan.</p>
+                                </div>
+                                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                                    <span class="text-xs text-slate-400 font-bold uppercase tracking-wider block mb-1">Cakupan Wilayah</span>
+                                    <h4 id="total-region-count" class="text-2xl font-black text-slate-900 tracking-tight">0 Kabupaten</h4>
+                                    <p class="text-[11px] text-slate-500 mt-1">Mitra aktif dinas ketenagakerjaan daerah.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel 2: Pendaftaran Peserta -->
+                <div id="panel-2" class="panel-content hidden-panel fade-in space-y-6">
+                    <div class="glass-panel p-6 sm:p-8 rounded-2xl elegant-shadow border border-slate-200">
+                        <div class="mb-6 pb-4 border-b border-slate-200 flex items-center space-x-3">
+                            <div class="p-3 bg-blue-100 text-blue-900 rounded-xl">
+                                <i class="fa-solid fa-user-plus text-xl"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-2xl font-black text-slate-900">Formulir Pendaftaran Peserta</h2>
+                                <p class="text-xs text-slate-500 uppercase tracking-wide font-semibold mt-0.5">Lengkapi data diri akurat untuk verifikasi penempatan</p>
+                            </div>
+                        </div>
+
+                        <form id="form-pendaftaran" onsubmit="submitRegistration(event)" class="space-y-5">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div>
+                                    <label class="block text-slate-700 text-xs font-bold mb-2 uppercase tracking-wide">Nama Lengkap</label>
+                                    <input type="text" id="reg-nama" placeholder="Masukkan nama sesuai KTP" class="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-900 text-sm" required>
+                                </div>
+                                <div>
+                                    <label class="block text-slate-700 text-xs font-bold mb-2 uppercase tracking-wide">NIK Kependudukan</label>
+                                    <input type="text" id="reg-nik" placeholder="16 digit nomor NIK" class="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-900 text-sm" required>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div>
+                                    <label class="block text-slate-700 text-xs font-bold mb-2 uppercase tracking-wide">Umur (Tahun)</label>
+                                    <input type="number" id="reg-umur" placeholder="Cth: 22" min="17" max="60" class="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg text-sm" required>
+                                </div>
+                                <div>
+                                    <label class="block text-slate-700 text-xs font-bold mb-2 uppercase tracking-wide">Nomor WhatsApp Aktif</label>
+                                    <input type="tel" id="reg-hp" placeholder="08xxxxxxxxxx" class="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg text-sm" required>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div>
+                                    <label class="block text-slate-700 text-xs font-bold mb-2 uppercase tracking-wide">Kabupaten / Domisili</label>
+                                    <select id="reg-kabupaten" class="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg text-sm font-semibold" required></select>
+                                </div>
+                                <div>
+                                    <label class="block text-slate-700 text-xs font-bold mb-2 uppercase tracking-wide">Kirim Data Ke Dinas Terkait</label>
+                                    <select id="reg-dinas-tujuan" class="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg text-sm font-semibold text-blue-900" required></select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-slate-700 text-xs font-bold mb-2 uppercase tracking-wide">Alamat Lengkap Domisili</label>
+                                <textarea id="reg-alamat" placeholder="Nama jalan, RT/RW, Kelurahan, Kecamatan..." class="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg text-sm h-20" required></textarea>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div>
+                                    <label class="block text-slate-700 text-xs font-bold mb-2 uppercase tracking-wide">Pengalaman Kerja / Pelatihan</label>
+                                    <input type="text" id="reg-pengalaman" placeholder="Cth: Belum pernah" class="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg text-sm" required>
+                                </div>
+                                <div>
+                                    <label class="block text-slate-700 text-xs font-bold mb-2 uppercase tracking-wide">Skill / Keahlian Saat Ini</label>
+                                    <input type="text" id="reg-skill" placeholder="Cth: Komputer" class="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg text-sm" required>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-slate-700 text-xs font-bold mb-2 uppercase tracking-wide">Pilih Program Pelatihan Tujuan</label>
+                                <select id="reg-pelatihan" class="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg text-sm font-semibold" required></select>
+                            </div>
+
+                            <button type="submit" class="w-full bg-blue-900 text-white font-bold py-3.5 rounded-xl hover:bg-blue-800 transition uppercase tracking-wider text-sm shadow-md">
+                                Kirim Pendaftaran Resmi
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Panel 3: Bursa Kebutuhan Industri -->
+                <div id="panel-3" class="panel-content hidden-panel fade-in space-y-6">
+                    <div class="mb-2">
+                        <h2 class="text-3xl font-black text-slate-900 tracking-tight">Bursa Lowongan & Industri</h2>
+                        <p class="text-slate-500 text-sm mt-1">Pilih lowongan pekerjaan sesuai kualifikasi dan ajukan lamaran Anda.</p>
+                    </div>
+                    <div id="job-list" class="space-y-4"></div>
+                </div>
+
+                <!-- Panel 4: Pendataan Alumni Pelatihan -->
+                <div id="panel-4" class="panel-content hidden-panel fade-in">
+                    <div class="glass-panel p-6 sm:p-8 rounded-2xl elegant-shadow border border-slate-200">
+                        <div class="mb-6 pb-4 border-b border-slate-200 flex items-center space-x-3">
+                            <div class="p-3 bg-blue-100 text-blue-900 rounded-xl">
+                                <i class="fa-solid fa-user-graduate text-xl"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-2xl font-black text-slate-900">Formulir Pendataan Alumni</h2>
+                                <p class="text-xs text-slate-500 uppercase tracking-wide font-semibold mt-0.5">Isi data alumni untuk pelacakan karir dan penempatan kerja</p>
+                            </div>
+                        </div>
+                        <form onsubmit="submitAlumni(event)" class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-slate-700 text-xs font-bold mb-1.5 uppercase">Nama Lengkap Alumni</label>
+                                    <input type="text" id="alumni-nama" placeholder="Nama lengkap" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-sm" required>
+                                </div>
+                                <div>
+                                    <label class="block text-slate-700 text-xs font-bold mb-1.5 uppercase">Nomor HP / WhatsApp</label>
+                                    <input type="tel" id="alumni-hp" placeholder="08xxxxxxxxxx" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-sm" required>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-slate-700 text-xs font-bold mb-1.5 uppercase">Jenis Kelamin</label>
+                                    <select id="alumni-jk" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-sm font-semibold" required>
+                                        <option value="Laki-laki">Laki-laki</option>
+                                        <option value="Perempuan">Perempuan</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-slate-700 text-xs font-bold mb-1.5 uppercase">Pelatihan yang Pernah Diikuti</label>
+                                    <input type="text" id="alumni-pelatihan" placeholder="Cth: Teknisi Jaringan" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-sm" required>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-slate-700 text-xs font-bold mb-1.5 uppercase">Lokasi Pekerjaan Saat Ini</label>
+                                    <input type="text" id="alumni-lokasi-kerja" placeholder="Cth: Kota Sorong" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-sm" required>
+                                </div>
+                                <div>
+                                    <label class="block text-slate-700 text-xs font-bold mb-1.5 uppercase">Jabatan / Posisi Kerja</label>
+                                    <input type="text" id="alumni-jabatan" placeholder="Cth: Teknisi Lapangan" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-sm" required>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-slate-700 text-xs font-bold mb-1.5 uppercase">Alamat Lengkap</label>
+                                <textarea id="alumni-alamat" placeholder="Alamat domisili..." class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-sm h-20" required></textarea>
+                            </div>
+                            <button type="submit" class="w-full bg-blue-900 text-white font-bold py-3.5 rounded-xl hover:bg-blue-800 transition uppercase tracking-wider text-sm shadow-md">
+                                Kirim Data Alumni
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Panel 5: Pengaduan Layanan -->
+                <div id="panel-5" class="panel-content hidden-panel fade-in">
+                    <div class="glass-panel p-6 sm:p-8 rounded-2xl elegant-shadow border border-slate-200">
+                        <div class="mb-6 pb-4 border-b border-slate-200 flex items-center space-x-3">
+                            <div class="p-3 bg-red-100 text-red-900 rounded-xl">
+                                <i class="fa-solid fa-comments text-xl"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-2xl font-black text-slate-900">Formulir Pengaduan Layanan</h2>
+                                <p class="text-xs text-slate-500 uppercase tracking-wide font-semibold mt-0.5">Sampaikan pengaduan, kritik, atau saran perbaikan layanan</p>
+                            </div>
+                        </div>
+                        <form onsubmit="submitPengaduan(event)" class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-slate-700 text-xs font-bold mb-1.5 uppercase">Kategori Pelapor</label>
+                                    <select id="adu-kategori" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-sm font-semibold" required>
+                                        <option value="Masyarakat">Masyarakat</option>
+                                        <option value="Perusahaan">Perusahaan</option>
+                                        <option value="Lembaga Pendidikan">Lembaga Pendidikan</option>
+                                        <option value="Instansi Pemerintah">Instansi Pemerintah</option>
+                                        <option value="Lainnya">Lainnya</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-slate-700 text-xs font-bold mb-1.5 uppercase">Judul Pengaduan</label>
+                                    <input type="text" id="adu-judul" placeholder="Ringkasan pengaduan" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-sm" required>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-slate-700 text-xs font-bold mb-1.5 uppercase">Tanggal Kejadian</label>
+                                    <input type="date" id="adu-tanggal" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-sm" required>
+                                </div>
+                                <div>
+                                    <label class="block text-slate-700 text-xs font-bold mb-1.5 uppercase">Lokasi Kejadian</label>
+                                    <input type="text" id="adu-lokasi" placeholder="Cth: Workshop BPVP" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-sm" required>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-slate-700 text-xs font-bold mb-1.5 uppercase">Unit / Bagian yang Diadukan</label>
+                                <input type="text" id="adu-unit" placeholder="Cth: Pelayanan Pendaftaran" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-sm" required>
+                            </div>
+                            <div>
+                                <label class="block text-slate-700 text-xs font-bold mb-1.5 uppercase">Kronologi Kejadian</label>
+                                <textarea id="adu-kronologi" placeholder="Jelaskan kronologi kejadian..." class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-sm h-20" required></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-slate-700 text-xs font-bold mb-1.5 uppercase">Saran Perbaikan Layanan</label>
+                                <textarea id="adu-saran" placeholder="Berikan saran konstruktif..." class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-sm h-16" required></textarea>
+                            </div>
+                            <button type="submit" class="w-full bg-blue-900 text-white font-bold py-3.5 rounded-xl hover:bg-blue-800 transition uppercase tracking-wider text-sm shadow-md">
+                                Kirim Pengaduan Layanan
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+        <!-- AREA ADMIN (TAMPIL KETIKA LOGIN) -->
+        <main id="admin-area" class="hidden-panel fade-in w-full space-y-8">
+            
+            <!-- Admin 1: Super Admin (BPVP Sorong) -->
+            <div id="admin1-dashboard" class="hidden-panel space-y-8">
+                <div class="border-b-2 border-slate-200 pb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h2 class="text-3xl font-black text-blue-900 flex items-center">
+                            <i class="fa-solid fa-shield-halved mr-3 text-blue-700"></i>Super Admin (BPVP Sorong)
+                        </h2>
+                        <p class="text-slate-500 mt-1 text-sm">Pusat kendali program diklat, manajemen pelatihan publik, statistik kabupaten, pengaduan, pendataan alumni, dan manajemen akun.</p>
+                    </div>
+                </div>
+
+                <!-- TABS KELOLA ADMIN 1 -->
+                <div class="flex border-b border-slate-300 gap-2 overflow-x-auto">
+                    <button onclick="switchAdmin1Tab('tab-stat', this)" class="admin1-tab-btn px-4 py-2.5 font-bold text-blue-900 border-b-2 border-blue-900 text-xs uppercase">Statistik & Pengajuan</button>
+                    <button onclick="switchAdmin1Tab('tab-trainings', this)" class="admin1-tab-btn px-4 py-2.5 font-semibold text-slate-500 border-b-2 border-transparent text-xs uppercase">Kelola Pelatihan (<span id="count-trainings-badge">0</span>)</button>
+                    <button onclick="switchAdmin1Tab('tab-accounts', this)" class="admin1-tab-btn px-4 py-2.5 font-semibold text-slate-500 border-b-2 border-transparent text-xs uppercase">Kelola Akun (<span id="count-accounts-badge">0</span>)</button>
+                    <button onclick="switchAdmin1Tab('tab-alumni', this)" class="admin1-tab-btn px-4 py-2.5 font-semibold text-slate-500 border-b-2 border-transparent text-xs uppercase">Data Alumni (<span id="count-alumni-badge">0</span>)</button>
+                    <button onclick="switchAdmin1Tab('tab-pengaduan', this)" class="admin1-tab-btn px-4 py-2.5 font-semibold text-slate-500 border-b-2 border-transparent text-xs uppercase">Pengaduan Masuk (<span id="count-adu-badge">0</span>)</button>
+                </div>
+
+                <!-- TAB 1: STATISTIK & PENGAJUAN -->
+                <div id="tab-stat" class="admin1-tab-content space-y-8">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-1 glass-panel p-6 rounded-2xl elegant-shadow border border-slate-200">
+                            <h3 class="text-base font-black mb-4 text-slate-900 uppercase tracking-wider border-b pb-2 flex items-center">
+                                <i class="fa-solid fa-chart-column mr-2 text-blue-700"></i>Kelola Statistik Kabupaten
+                            </h3>
+                            <form onsubmit="saveKabupatenStat(event)" class="space-y-3">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 mb-1 uppercase">Nama Kabupaten / Kota</label>
+                                    <input type="text" id="stat-kab-name" placeholder="Cth: Kabupaten Fakfak" class="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-lg text-sm" required>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 mb-1 uppercase">Jumlah Peserta Telah Dilatih</label>
+                                    <input type="number" id="stat-kab-count" placeholder="Cth: 145" min="0" class="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-lg text-sm" required>
+                                </div>
+                                <button type="submit" class="w-full bg-blue-900 text-white py-2.5 rounded-xl font-bold hover:bg-blue-800 transition text-xs uppercase tracking-wider">Simpan Data</button>
+                            </form>
+                        </div>
+
+                        <div class="lg:col-span-2 glass-panel p-6 rounded-2xl elegant-shadow border border-slate-200">
+                            <h3 class="text-base font-black mb-4 text-slate-900 uppercase tracking-wider border-b pb-2 flex items-center">
+                                <i class="fa-solid fa-table-list mr-2 text-blue-700"></i>Daftar Wilayah & Peserta Terlatih
+                            </h3>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full text-left border-collapse">
+                                    <thead class="bg-slate-100 text-slate-700 border-b border-slate-300 uppercase text-[11px] tracking-wider">
+                                        <tr>
+                                            <th class="py-3 px-3">Kabupaten / Kota</th>
+                                            <th class="py-3 px-3">Peserta Terlatih</th>
+                                            <th class="py-3 px-3 text-center">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="admin1-stat-table" class="text-sm"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pengajuan Pelatihan dari Dinas -->
+                    <div class="glass-panel p-6 rounded-2xl elegant-shadow border border-slate-200">
+                        <h3 class="text-base font-black mb-4 text-slate-900 uppercase tracking-wider border-b pb-2 flex items-center">
+                            <i class="fa-solid fa-bullhorn mr-2 text-blue-700"></i>Daftar Pengajuan Pelatihan Baru dari Dinas
+                        </h3>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full text-left border-collapse">
+                                <thead class="bg-slate-100 text-slate-700 border-b border-slate-300 uppercase text-[11px] tracking-wider">
+                                    <tr>
+                                        <th class="py-3 px-3">Nama Dinas</th>
+                                        <th class="py-3 px-3">Usulan Kejuruan</th>
+                                        <th class="py-3 px-3">Jumlah Pendaftar</th>
+                                        <th class="py-3 px-3">Catatan & Waktu</th>
+                                        <th class="py-3 px-3 text-center">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin1-proposals-table" class="text-sm"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB BARU (PENGELOLAAN PELATIHAN LENGKAP OLEH ADMIN 1): Tambah, Edit, Hapus -->
+                <div id="tab-trainings" class="admin1-tab-content hidden-panel space-y-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Form Tambah/Edit Pelatihan -->
+                        <div class="lg:col-span-1 glass-panel p-6 rounded-2xl elegant-shadow border border-slate-200">
+                            <h3 id="form-training-title" class="text-base font-black mb-4 text-slate-900 uppercase tracking-wider border-b pb-2 flex items-center">
+                                <i class="fa-solid fa-circle-plus mr-2 text-blue-700"></i>Buka Pelatihan Baru
+                            </h3>
+                            <form onsubmit="saveTrainingData(event)" class="space-y-3">
+                                <input type="hidden" id="t-edit-id">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 mb-1 uppercase">Nama Kejuruan</label>
+                                    <input type="text" id="t-name" placeholder="Cth: Teknisi Fiber Optic" class="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-lg text-sm" required>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 mb-1 uppercase">Durasi</label>
+                                    <input type="text" id="t-duration" placeholder="Cth: 30 Hari" class="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-lg text-sm" required>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 mb-1 uppercase">Lokasi</label>
+                                    <input type="text" id="t-location" placeholder="Cth: Workshop" class="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-lg text-sm" required>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 mb-1 uppercase">URL Banner</label>
+                                    <input type="url" id="t-image" placeholder="https://images.unsplash.com/..." class="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-lg text-sm" required>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 mb-1 uppercase">Deskripsi</label>
+                                    <textarea id="t-desc" placeholder="Penjelasan lengkap..." class="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-lg text-sm h-20" required></textarea>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button type="submit" id="btn-submit-training" class="flex-grow bg-blue-900 text-white py-2.5 rounded-xl font-bold hover:bg-blue-800 transition text-xs uppercase tracking-wider">Simpan Pelatihan</button>
+                                    <button type="button" id="btn-cancel-edit" onclick="resetTrainingForm()" class="hidden bg-slate-300 text-slate-700 px-3 py-2.5 rounded-xl font-bold hover:bg-slate-400 transition text-xs uppercase">Batal</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Tabel Kelola Pelatihan Publik -->
+                        <div class="lg:col-span-2 glass-panel p-6 rounded-2xl elegant-shadow border border-slate-200">
+                            <h3 class="text-base font-black mb-4 text-slate-900 uppercase tracking-wider border-b pb-2 flex items-center">
+                                <i class="fa-solid fa-list-check mr-2 text-blue-700"></i>Daftar Informasi Pelatihan Tampil di Publik
+                            </h3>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full text-left border-collapse">
+                                    <thead class="bg-slate-100 text-slate-700 border-b border-slate-300 uppercase text-[11px] tracking-wider">
+                                        <tr>
+                                            <th class="py-3 px-3">Kejuruan & Durasi</th>
+                                            <th class="py-3 px-3">Lokasi</th>
+                                            <th class="py-3 px-3">Tanggal Input</th>
+                                            <th class="py-3 px-3 text-center">Aksi (Edit / Hapus)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="admin1-trainings-table" class="text-sm"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: KELOLA AKUN ADMIN 2 & ADMIN 3 -->
+                <div id="tab-accounts" class="admin1-tab-content hidden-panel space-y-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Form Tambah Akun -->
+                        <div class="lg:col-span-1 glass-panel p-6 rounded-2xl elegant-shadow border border-slate-200">
+                            <h3 class="text-base font-black mb-4 text-slate-900 uppercase tracking-wider border-b pb-2 flex items-center">
+                                <i class="fa-solid fa-user-plus mr-2 text-blue-700"></i>Tambah Akun Baru
+                            </h3>
+                            <form onsubmit="addAccount(event)" class="space-y-3">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 mb-1 uppercase">Nama Instansi / Perusahaan</label>
+                                    <input type="text" id="acc-name" placeholder="Cth: Dinas Tenaga Kerja..." class="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-lg text-sm" required>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 mb-1 uppercase">Kata Sandi (Password)</label>
+                                    <input type="text" id="acc-pass" placeholder="Password akun" class="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-lg text-sm" required>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 mb-1 uppercase">Hak Akses Sistem</label>
+                                    <select id="acc-role" class="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-lg text-sm font-semibold" required>
+                                        <option value="admin2">Admin 2 (Dinas)</option>
+                                        <option value="admin3">Admin 3 (Perusahaan)</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="w-full bg-blue-900 text-white py-2.5 rounded-xl font-bold hover:bg-blue-800 transition text-xs uppercase tracking-wider">Simpan Akun</button>
+                            </form>
+                        </div>
+
+                        <!-- Tabel Kelola Akun -->
+                        <div class="lg:col-span-2 glass-panel p-6 rounded-2xl elegant-shadow border border-slate-200">
+                            <h3 class="text-base font-black mb-4 text-slate-900 uppercase tracking-wider border-b pb-2 flex items-center">
+                                <i class="fa-solid fa-users-gear mr-2 text-blue-700"></i>Daftar Akun Pengelola (Admin 2 & Admin 3)
+                            </h3>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full text-left border-collapse">
+                                    <thead class="bg-slate-100 text-slate-700 border-b border-slate-300 uppercase text-[11px] tracking-wider">
+                                        <tr>
+                                            <th class="py-3 px-3">Nama Instansi / Perusahaan</th>
+                                            <th class="py-3 px-3">Role / Akses</th>
+                                            <th class="py-3 px-3">Password</th>
+                                            <th class="py-3 px-3 text-center">Aksi (Reset / Hapus)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="admin1-accounts-table" class="text-sm"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: DATA ALUMNI -->
+                <div id="tab-alumni" class="admin1-tab-content hidden-panel space-y-6">
+                    <div class="flex justify-between items-center bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                        <div>
+                            <h3 class="text-xl font-black text-slate-900">Data Pendataan Alumni Pelatihan</h3>
+                            <p class="text-xs text-slate-500 mt-0.5">Daftar alumni yang mengirimkan data penempatan karir.</p>
+                        </div>
+                        <button onclick="window.print()" class="bg-slate-900 text-white px-5 py-2.5 rounded-xl hover:bg-slate-800 transition font-bold text-xs shadow-md uppercase tracking-wider flex items-center">
+                            <i class="fa-solid fa-print mr-2"></i>Cetak Laporan
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
+                        <table class="min-w-full text-left">
+                            <thead class="bg-slate-100 text-slate-700 uppercase text-[11px] tracking-wider">
+                                <tr>
+                                    <th class="py-3.5 px-4 border-b">Nama & Jenis Kelamin</th>
+                                    <th class="py-3.5 px-4 border-b">No HP & Alamat</th>
+                                    <th class="py-3.5 px-4 border-b">Pelatihan</th>
+                                    <th class="py-3.5 px-4 border-b">Pekerjaan & Jabatan</th>
+                                    <th class="py-3.5 px-4 border-b">Tanggal Input</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin1-alumni-table" class="text-sm text-slate-700"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TAB: PENGADUAN -->
+                <div id="tab-pengaduan" class="admin1-tab-content hidden-panel space-y-6">
+                    <div class="glass-panel p-6 rounded-2xl border border-slate-200">
+                        <h3 class="text-xl font-black text-slate-900 mb-1">Daftar Pengaduan Masuk</h3>
+                        <p class="text-xs text-slate-500 mb-6">Tinjau seluruh pengaduan dan saran perbaikan layanan.</p>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full text-left">
+                                <thead class="bg-slate-100 text-slate-700 uppercase text-[11px] tracking-wider">
+                                    <tr>
+                                        <th class="py-3.5 px-4 border-b">Kategori & Judul</th>
+                                        <th class="py-3.5 px-4 border-b">Kejadian & Unit</th>
+                                        <th class="py-3.5 px-4 border-b">Kronologi & Saran</th>
+                                        <th class="py-3.5 px-4 border-b">Tanggal</th>
+                                        <th class="py-3.5 px-4 border-b text-center">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin1-pengaduan-table" class="text-sm text-slate-700"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin 2: Dinas -->
+            <div id="admin2-dashboard" class="hidden-panel glass-panel p-6 sm:p-8 rounded-2xl elegant-shadow border border-slate-200 space-y-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-4 border-b border-slate-200 gap-4">
+                    <div>
+                        <h2 class="text-2xl font-black text-slate-900 flex items-center">
+                            <i class="fa-solid fa-address-book mr-3 text-blue-700"></i>Dashboard Dinas Pengampu
+                        </h2>
+                        <p class="text-xs text-slate-500 mt-1" id="admin2-subtitle">Verifikasi pendaftar pelatihan dan teruskan lamaran pekerjaan.</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="openProposeTrainingModal()" class="bg-blue-900 text-white px-4 py-2 rounded-xl hover:bg-blue-800 transition font-bold text-xs uppercase tracking-wider flex items-center">
+                            <i class="fa-solid fa-paper-plane mr-2"></i>Ajukan Pelatihan
+                        </button>
+                        <button onclick="window.print()" class="bg-slate-900 text-white px-4 py-2 rounded-xl hover:bg-slate-800 transition font-bold text-xs uppercase tracking-wider flex items-center">
+                            <i class="fa-solid fa-print mr-2"></i>Cetak
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex border-b border-slate-300 gap-2">
+                    <button onclick="switchAdmin2Tab('tab-dinas-reg', this)" class="admin2-tab-btn px-4 py-2 font-bold text-blue-900 border-b-2 border-blue-900 text-xs uppercase">Pendaftar Pelatihan</button>
+                    <button onclick="switchAdmin2Tab('tab-dinas-job', this)" class="admin2-tab-btn px-4 py-2 font-semibold text-slate-500 border-b-2 border-transparent text-xs uppercase">Lamaran Pekerjaan Masuk (<span id="count-jobapp-badge">0</span>)</button>
+                </div>
+
+                <div id="tab-dinas-reg" class="admin2-tab-content overflow-x-auto rounded-xl border border-slate-200 bg-white">
+                    <table class="min-w-full text-left">
+                        <thead class="bg-slate-100 text-slate-700 uppercase text-[11px] tracking-wider">
+                            <tr>
+                                <th class="py-3 px-4 border-b">Nama Peserta / NIK</th>
+                                <th class="py-3 px-4 border-b">Umur & HP</th>
+                                <th class="py-3 px-4 border-b">Domisili</th>
+                                <th class="py-3 px-4 border-b">Skill</th>
+                                <th class="py-3 px-4 border-b">Pelatihan Tujuan</th>
+                                <th class="py-3 px-4 border-b text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="registrant-table-body" class="text-sm text-slate-700"></tbody>
+                    </table>
+                </div>
+
+                <div id="tab-dinas-job" class="admin2-tab-content hidden-panel overflow-x-auto rounded-xl border border-slate-200 bg-white">
+                    <table class="min-w-full text-left">
+                        <thead class="bg-slate-100 text-slate-700 uppercase text-[11px] tracking-wider">
+                            <tr>
+                                <th class="py-3 px-4 border-b">Pelamar & Kontak</th>
+                                <th class="py-3 px-4 border-b">Posisi Dilamar</th>
+                                <th class="py-3 px-4 border-b">Perusahaan</th>
+                                <th class="py-3 px-4 border-b">Tanggal</th>
+                                <th class="py-3 px-4 border-b text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dinas-jobapp-table" class="text-sm text-slate-700"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Admin 3: Perusahaan -->
+            <div id="admin3-dashboard" class="hidden-panel space-y-6">
+                <div class="border-b-2 border-slate-200 pb-4">
+                    <h2 class="text-2xl font-black text-slate-900 flex items-center">
+                        <i class="fa-solid fa-building-user mr-3 text-blue-700"></i>Dashboard Industri / Perusahaan
+                    </h2>
+                    <p class="text-slate-500 mt-1 text-xs">Kelola lowongan pekerjaan dan pantau pelamar yang diteruskan oleh Dinas.</p>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-1 glass-panel p-6 rounded-2xl elegant-shadow border border-slate-200">
+                        <h3 class="text-base font-black mb-4 text-slate-900 uppercase tracking-wider border-b pb-2 flex items-center">
+                            <i class="fa-solid fa-bullhorn mr-2 text-blue-700"></i>Posting Lowongan Detail
+                        </h3>
+                        <form onsubmit="addJob(event)" class="space-y-3">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1 uppercase">Nama Perusahaan</label>
+                                <input type="text" id="j-company" class="w-full px-3.5 py-2 bg-slate-100 border border-slate-300 rounded-lg text-slate-500 text-sm font-semibold" readonly required>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1 uppercase">Lokasi</label>
+                                <input type="text" id="j-lokasi" placeholder="Cth: Jl. Ahmad Yani, Sorong" class="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-lg text-sm" required>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1 uppercase">Nama Jabatan</label>
+                                <input type="text" id="j-position" placeholder="Cth: Teknisi Splicer" class="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-lg text-sm" required>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 mb-1 uppercase">Pendidikan</label>
+                                    <input type="text" id="j-pendidikan" placeholder="Cth: SMK / D3" class="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-lg text-sm" required>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 mb-1 uppercase">Batas Umur</label>
+                                    <input type="text" id="j-umur" placeholder="Cth: Maks 30 Thn" class="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-lg text-sm" required>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1 uppercase">Keterampilan</label>
+                                <input type="text" id="j-ket" placeholder="Cth: Splicer, Sertifikasi" class="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-lg text-sm" required>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1 uppercase">Deskripsi Lengkap</label>
+                                <textarea id="j-skill" placeholder="Uraian detail tugas..." class="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-lg text-sm h-20" required></textarea>
+                            </div>
+                            <button type="submit" class="w-full bg-blue-900 text-white py-2.5 rounded-xl font-bold hover:bg-blue-800 transition text-xs uppercase tracking-wider">Publikasikan</button>
+                        </form>
+                    </div>
+
+                    <div class="lg:col-span-2 space-y-6">
+                        <div class="glass-panel p-6 rounded-2xl elegant-shadow border border-slate-200">
+                            <h3 class="text-base font-black mb-4 text-slate-900 uppercase tracking-wider border-b pb-2 flex items-center">
+                                <i class="fa-solid fa-list mr-2 text-blue-700"></i>Lowongan Aktif Anda
+                            </h3>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full text-left border-collapse">
+                                    <thead class="bg-slate-100 text-slate-700 border-b border-slate-300 uppercase text-[11px] tracking-wider">
+                                        <tr>
+                                            <th class="py-3 px-3">Posisi & Lokasi</th>
+                                            <th class="py-3 px-3">Kualifikasi</th>
+                                            <th class="py-3 px-3">Waktu</th>
+                                            <th class="py-3 px-3 text-center">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="admin3-job-table" class="text-sm"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="glass-panel p-6 rounded-2xl elegant-shadow border border-slate-200">
+                            <h3 class="text-base font-black mb-4 text-slate-900 uppercase tracking-wider border-b pb-2 flex items-center">
+                                <i class="fa-solid fa-user-check mr-2 text-blue-700"></i>Daftar Pelamar Rujukan Dinas
+                            </h3>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full text-left border-collapse">
+                                    <thead class="bg-slate-100 text-slate-700 border-b border-slate-300 uppercase text-[11px] tracking-wider">
+                                        <tr>
+                                            <th class="py-3 px-3">Pelamar & Kontak</th>
+                                            <th class="py-3 px-3">Posisi</th>
+                                            <th class="py-3 px-3">Dinas Pengantar</th>
+                                            <th class="py-3 px-3 text-center">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="admin3-applicants-table" class="text-sm"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL DETAIL INFO PELATIHAN -->
+    <div id="training-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl relative fade-in overflow-hidden border-t-8 border-blue-900 max-h-[90vh] flex flex-col">
+            <button onclick="toggleModal('training-modal')" class="absolute top-4 right-4 text-white bg-slate-900/60 hover:bg-red-600 w-10 h-10 rounded-full flex items-center justify-center text-xl transition z-10">&times;</button>
+            <div class="relative h-56 w-full bg-slate-900">
+                <img id="modal-train-img" src="" alt="Banner" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent"></div>
+                <div class="absolute bottom-4 left-6 right-6 text-white">
+                    <span id="modal-train-duration" class="bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-bold uppercase mb-2 inline-block"></span>
+                    <h2 id="modal-train-title" class="text-2xl font-black leading-tight drop-shadow"></h2>
+                </div>
+            </div>
+            <div class="p-6 overflow-y-auto space-y-4">
+                <div class="flex items-center text-slate-600 font-semibold text-sm">
+                    <i class="fa-solid fa-location-dot text-blue-700 mr-2"></i>
+                    <span id="modal-train-location"></span>
+                </div>
+                <div id="modal-train-date" class="text-xs text-slate-400 font-semibold"></div>
+                <hr class="border-slate-200">
+                <div>
+                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Deskripsi & Kurikulum</h4>
+                    <p id="modal-train-desc" class="text-slate-700 text-sm leading-relaxed whitespace-pre-line"></p>
+                </div>
+                <div class="pt-2">
+                    <button onclick="gotoRegistrationFromModal()" class="w-full bg-blue-900 text-white font-bold py-3 rounded-xl hover:bg-blue-800 transition uppercase tracking-wider text-xs shadow-md">
+                        Daftar Pelatihan Ini Sekarang
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DETAIL LOWONGAN KERJA & LAMAR -->
+    <div id="job-detail-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg relative fade-in p-6 border-t-8 border-blue-900 max-h-[90vh] overflow-y-auto">
+            <button onclick="toggleModal('job-detail-modal')" class="absolute top-4 right-4 text-slate-400 hover:text-red-600 text-2xl transition">&times;</button>
+            <div class="mb-4">
+                <span id="modal-job-comp" class="bg-blue-100 text-blue-900 text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider inline-block mb-1"></span>
+                <h3 id="modal-job-pos" class="text-xl font-black text-slate-900"></h3>
+                <p id="modal-job-loc" class="text-xs font-semibold text-blue-700 mt-0.5"><i class="fa-solid fa-location-dot mr-1"></i></p>
+                <p id="modal-job-date" class="text-[11px] text-slate-400"></p>
+            </div>
+            
+            <div class="space-y-2 mb-4 bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
+                <div><strong>Pendidikan:</strong> <span id="modal-job-edu" class="text-slate-700"></span></div>
+                <div><strong>Batas Umur:</strong> <span id="modal-job-age" class="text-slate-700"></span></div>
+                <div><strong>Keterampilan:</strong> <span id="modal-job-ket" class="text-slate-700"></span></div>
+                <div><strong>Deskripsi:</strong> <p id="modal-job-desc" class="text-slate-700 mt-0.5 whitespace-pre-line"></p></div>
+            </div>
+
+            <form onsubmit="submitJobApplication(event)" class="space-y-3 border-t pt-3">
+                <input type="hidden" id="apply-job-id">
+                <h4 class="text-xs font-bold text-slate-900 uppercase">Formulir Pengajuan Lamaran</h4>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1 uppercase">Nama Lengkap Pelamar</label>
+                    <input type="text" id="apply-name" placeholder="Sesuai KTP" class="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-lg text-sm" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1 uppercase">Nomor WhatsApp</label>
+                    <input type="tel" id="apply-hp" placeholder="08xxxxxxxxxx" class="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-lg text-sm" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1 uppercase text-blue-900">Pilih Dinas Penyalur</label>
+                    <div id="apply-dinas-checkboxes" class="space-y-1.5 max-h-32 overflow-y-auto p-2.5 bg-white border border-slate-200 rounded-lg"></div>
+                </div>
+                <button type="submit" class="w-full bg-blue-900 text-white font-bold py-3 rounded-xl hover:bg-blue-800 transition text-xs uppercase tracking-wider shadow-md">
+                    Kirim Lamaran ke Dinas
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL PENGAJUAN PELATIHAN OLEH DINAS -->
+    <div id="propose-training-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md relative fade-in p-6 border-t-8 border-blue-900">
+            <button onclick="toggleModal('propose-training-modal')" class="absolute top-4 right-4 text-slate-400 hover:text-red-600 text-2xl transition">&times;</button>
+            <div class="mb-4">
+                <h3 class="text-lg font-black text-slate-900">Ajukan Pelatihan ke Admin 1</h3>
+                <p class="text-xs text-slate-500 mt-0.5">Digunakan saat jumlah pendaftar sudah mencukupi kuota.</p>
+            </div>
+            <form onsubmit="submitTrainingProposal(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1 uppercase">Pilih Kejuruan</label>
+                    <select id="prop-training-name" class="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-lg text-sm font-semibold" required></select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1 uppercase">Jumlah Pendaftar</label>
+                    <input type="number" id="prop-count" placeholder="Cth: 16" class="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-lg text-sm" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1 uppercase">Catatan</label>
+                    <textarea id="prop-note" placeholder="Keterangan tambahan..." class="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-lg text-sm h-16" required></textarea>
+                </div>
+                <button type="submit" class="w-full bg-blue-900 text-white font-bold py-3 rounded-xl hover:bg-blue-800 transition text-xs uppercase tracking-wider shadow-md">
+                    Kirim Pengajuan
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL LOGIN -->
+    <div id="login-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md relative fade-in p-6 border-t-8 border-blue-900">
+            <button onclick="toggleModal('login-modal')" class="absolute top-4 right-5 text-slate-400 hover:text-red-600 text-2xl transition">&times;</button>
+            <div class="text-center mb-6">
+                <div class="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3 border border-blue-200">
+                    <i class="fa-solid fa-shield-cat text-2xl text-blue-900"></i>
+                </div>
+                <h2 class="text-xl font-black text-slate-900 uppercase tracking-wide">Otorisasi Sistem</h2>
+                <p class="text-xs text-slate-500 mt-0.5 uppercase tracking-wider font-semibold">Masukkan kredensial akun pengelola</p>
+            </div>
+            
+            <div class="space-y-3 mb-5">
+                <div>
+                    <label class="block text-slate-700 text-xs font-bold mb-1.5 uppercase tracking-wide">Pilih Akun / Instansi</label>
+                    <select id="login-account-select" class="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg bg-slate-50 text-slate-800 text-sm font-semibold" required></select>
+                </div>
+                <div>
+                    <label class="block text-slate-700 text-xs font-bold mb-1.5 uppercase tracking-wide">Kata Sandi (Password)</label>
+                    <input type="password" id="login-password-input" placeholder="Masukkan password..." class="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg bg-slate-50 text-sm" required>
+                    <p class="text-[11px] text-slate-400 mt-1 italic">*Password '12345' untuk Super Admin</p>
+                </div>
+            </div>
+            <button onclick="processLogin()" class="w-full bg-blue-900 text-white font-bold py-3 rounded-xl hover:bg-slate-900 shadow-lg transition uppercase tracking-wider text-sm">Autentikasi Masuk</button>
+        </div>
+    </div>
+
+    <!-- SCRIPT APLIKASI -->
+    <script>
+        let state = {
+            accounts: [
+                { id: 1, name: "BPVP Pusat Sorong", role: "admin1", pass: "12345" },
+                { id: 2, name: "Dinas Tenaga Kerja Kota Sorong", role: "admin2", pass: "password" },
+                { id: 3, name: "Dinas Tenaga Kerja Kabupaten Sorong", role: "admin2", pass: "password" },
+                { id: 4, name: "PT. Telkom Akses Sorong", role: "admin3", pass: "password" },
+                { id: 5, name: "PT. Freeport Indonesia Partner", role: "admin3", pass: "password" }
+            ],
+            trainings: [
+                { 
+                    id: 101, 
+                    name: "Teknisi Jaringan & Fiber Optic", 
+                    duration: "30 Hari", 
+                    location: "Workshop BPVP Sorong", 
+                    image: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=800&q=80",
+                    desc: "Mempelajari instalasi jaringan kabel serat optik dari awal hingga penyambungan menggunakan Fusion Splicer, pengukuran OTDR, dan troubleshooting.",
+                    uploadedBy: "BPVP Pusat Sorong",
+                    uploadDate: "2026-06-01 08:30"
+                },
+                { 
+                    id: 102, 
+                    name: "Manajemen Mutu ISO 9001:2015", 
+                    duration: "14 Hari", 
+                    location: "Aula Utama BPVP", 
+                    image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=800&q=80",
+                    desc: "Pelatihan komprehensif bagi tenaga profesional dan aparatur dalam mengelola sistem manajemen mutu perusahaan atau instansi publik.",
+                    uploadedBy: "BPVP Pusat Sorong",
+                    uploadDate: "2026-06-03 10:15"
+                }
+            ],
+            regionalStats: [
+                { id: 1, kab: "Kota Sorong", count: 215 },
+                { id: 2, kab: "Kabupaten Sorong", count: 180 },
+                { id: 3, kab: "Raja Ampat", count: 95 },
+                { id: 4, kab: "Sorong Selatan", count: 80 }
+            ],
+            registrations: [
+                { id: 201, nama: "Budi Santoso", nik: "9171012345670001", umur: 24, hp: "081234567890", kab: "Kota Sorong", dinas: "Dinas Tenaga Kerja Kota Sorong", alamat: "Jl. Jend. Sudirman", pengalaman: "Magang", skill: "Networking", pelatihan: "Teknisi Jaringan & Fiber Optic" }
+            ],
+            jobs: [
+                { 
+                    id: 301, 
+                    company: "PT. Telkom Akses Sorong", 
+                    position: "Teknisi Splicer Area", 
+                    lokasi: "Jl. Ahmad Yani No. 10, Kota Sorong",
+                    pendidikan: "SMK / D3 Teknik",
+                    umur: "Maks 30 Tahun",
+                    ketua: "Fusion Splicer, OTDR",
+                    skill: "Mampu fusion splicing, paham topologi FTTH. Lulusan/sertifikasi BPVP diutamakan.",
+                    uploadDate: "2026-06-10 14:20"
+                }
+            ],
+            jobApplications: [],
+            proposals: [
+                { id: 401, dinas: "Dinas Tenaga Kerja Kota Sorong", trainingName: "Teknisi Jaringan & Fiber Optic", count: 18, note: "Pendaftar memenuhi kuota.", uploadDate: "2026-06-12 09:00" }
+            ],
+            alumni: [
+                { id: 501, nama: "Joko Widodo", hp: "081122334455", jk: "Laki-laki", pelatihan: "Teknisi Jaringan & Fiber Optic", lokasiKerja: "Kota Sorong", jabatan: "Teknisi Lapangan", alamat: "Jl. Malanu", uploadDate: "2026-06-15 11:10" }
+            ],
+            pengaduan: [
+                { id: 601, kategori: "Masyarakat", judul: "Pertanyaan Jadwal Pelatihan", tanggal: "2026-06-16", lokasi: "Workshop BPVP", unit: "Pelayanan", kronologi: "Menanyakan kepastian pembukaan gelombang 2.", saran: "Mohon informasi dipercepat.", uploadDate: "2026-06-16 13:40" }
+            ],
+            currentUser: null,
+            chartInstance: null
+        };
+
+        window.onload = () => {
+            renderAccounts();
+            renderTrainings();
+            renderJobs();
+            renderDinasDropdowns();
+            renderProposals();
+            renderAdminStatTable();
+            renderPublicChart();
+            renderAlumniTable();
+            renderPengaduanTable();
+            renderAdmin2JobApps();
+            renderAdmin3Applicants();
+            renderAdminAccountsTable();
+            renderAdminTrainingsTable();
+        };
+
+        function getCurrentDateTime() {
+            const now = new Date();
+            const yyyy = now.getFullYear();
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const dd = String(now.getDate()).padStart(2, '0');
+            const hh = String(now.getHours()).padStart(2, '0');
+            const min = String(now.getMinutes()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd} ${hh}:${min}`;
+        }
+
+        function renderDinasDropdowns() {
+            const regDinasSelect = document.getElementById('reg-dinas-tujuan');
+            const regKabSelect = document.getElementById('reg-kabupaten');
+            const applyDinasContainer = document.getElementById('apply-dinas-checkboxes');
+            const propTrainingSelect = document.getElementById('prop-training-name');
+            
+            if(regDinasSelect) regDinasSelect.innerHTML = '';
+            if(regKabSelect) regKabSelect.innerHTML = '';
+            if(applyDinasContainer) applyDinasContainer.innerHTML = '';
+            if(propTrainingSelect) propTrainingSelect.innerHTML = '';
+
+            const dinasAccounts = state.accounts.filter(a => a.role === 'admin2');
+
+            dinasAccounts.forEach(d => {
+                if(regDinasSelect) {
+                    regDinasSelect.innerHTML += `<option value="${d.name}">${d.name}</option>`;
+                }
+                if(applyDinasContainer) {
+                    applyDinasContainer.innerHTML += `
+                        <label class="flex items-center space-x-2.5 p-2 bg-slate-50 rounded border border-slate-200 cursor-pointer hover:bg-slate-100 transition">
+                            <input type="radio" name="selected_dinas" value="${d.name}" class="text-blue-900 focus:ring-blue-900 h-4 w-4" required>
+                            <span class="text-xs font-bold text-slate-800">${d.name}</span>
+                        </label>
+                    `;
+                }
+            });
+
+            state.regionalStats.forEach(s => {
+                if(regKabSelect) {
+                    regKabSelect.innerHTML += `<option value="${s.kab}">${s.kab}</option>`;
+                }
+            });
+
+            state.trainings.forEach(t => {
+                if(propTrainingSelect) {
+                    propTrainingSelect.innerHTML += `<option value="${t.name}">${t.name}</option>`;
+                }
+            });
+        }
+
+        function renderAdminStatTable() {
+            const tbody = document.getElementById('admin1-stat-table');
+            if(!tbody) return;
+
+            tbody.innerHTML = '';
+            state.regionalStats.forEach(item => {
+                tbody.innerHTML += `
+                    <tr class="border-b border-slate-200 hover:bg-slate-50">
+                        <td class="py-3 px-3 font-bold text-slate-800">${item.kab}</td>
+                        <td class="py-3 px-3 font-semibold text-blue-900">${item.count} Orang</td>
+                        <td class="py-3 px-3 text-center space-x-1">
+                            <button onclick="editStatKab('${item.kab}', ${item.count})" class="text-blue-600 bg-blue-50 px-2 py-1 rounded text-xs font-bold border border-blue-200">Edit</button>
+                            <button onclick="deleteStatKab(${item.id})" class="text-red-500 bg-red-50 px-2 py-1 rounded text-xs font-bold border border-red-200">Hapus</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            renderPublicChart();
+        }
+
+        function editStatKab(kabName, currentCount) {
+            document.getElementById('stat-kab-name').value = kabName;
+            document.getElementById('stat-kab-count').value = currentCount;
+            document.getElementById('stat-kab-name').focus();
+        }
+
+        function saveKabupatenStat(e) {
+            e.preventDefault();
+            const kabName = document.getElementById('stat-kab-name').value.trim();
+            const count = parseInt(document.getElementById('stat-kab-count').value);
+
+            const existing = state.regionalStats.find(s => s.kab.toLowerCase() === kabName.toLowerCase());
+            if(existing) {
+                existing.count = count;
+                alert(`Data statistik untuk ${kabName} berhasil diperbarui!`);
+            } else {
+                state.regionalStats.push({ id: Date.now(), kab: kabName, count: count });
+                alert(`Kabupaten baru ${kabName} berhasil ditambahkan!`);
+            }
+            e.target.reset();
+            renderAdminStatTable();
+            renderDinasDropdowns();
+        }
+
+        function deleteStatKab(id) {
+            if(confirm("Yakin ingin menghapus data kabupaten ini?")) {
+                state.regionalStats = state.regionalStats.filter(s => s.id !== id);
+                renderAdminStatTable();
+                renderDinasDropdowns();
+            }
+        }
+
+        function renderPublicChart() {
+            const ctx = document.getElementById('publicTraineeChart');
+            if(!ctx) return;
+
+            const labels = state.regionalStats.map(s => s.kab);
+            const dataValues = state.regionalStats.map(s => s.count);
+            const totalCount = dataValues.reduce((a, b) => a + b, 0);
+
+            document.getElementById('total-trainee-count').innerText = totalCount.toLocaleString();
+            document.getElementById('total-region-count').innerText = `${labels.length} Kabupaten`;
+
+            if(state.chartInstance) state.chartInstance.destroy();
+
+            state.chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Peserta Terlatih',
+                        data: dataValues,
+                        backgroundColor: 'rgba(30, 58, 138, 0.85)',
+                        borderRadius: 8,
+                        barThickness: 'flex',
+                        maxBarThickness: 40
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { font: { size: 10, weight: '600' }, color: '#475569' } },
+                        y: { beginAtZero: true, grid: { color: 'rgba(226, 232, 240, 0.6)' }, ticks: { font: { size: 10 }, color: '#64748b' } }
+                    }
+                }
+            });
+        }
+
+        function renderAccounts() {
+            const loginSelect = document.getElementById('login-account-select');
+            if(loginSelect) loginSelect.innerHTML = '';
+            
+            state.accounts.forEach(acc => {
+                if(loginSelect) {
+                    loginSelect.innerHTML += `<option value="${acc.id}">${acc.name} (${formatRoleName(acc.role)})</option>`;
+                }
+            });
+            renderDinasDropdowns();
+            renderAdminAccountsTable();
+        }
+
+        function renderAdminAccountsTable() {
+            const tbody = document.getElementById('admin1-accounts-table');
+            const badge = document.getElementById('count-accounts-badge');
+            if(!tbody) return;
+
+            tbody.innerHTML = '';
+            const manageableAccounts = state.accounts.filter(a => a.role !== 'admin1');
+            if(badge) badge.innerText = manageableAccounts.length;
+
+            if(manageableAccounts.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-slate-400 italic">Belum ada akun tambahan.</td></tr>`;
+                return;
+            }
+
+            manageableAccounts.forEach(acc => {
+                tbody.innerHTML += `
+                    <tr class="border-b border-slate-200 hover:bg-slate-50">
+                        <td class="py-3 px-3 font-bold text-slate-800">${acc.name}</td>
+                        <td class="py-3 px-3 text-xs font-semibold text-blue-800">${formatRoleName(acc.role)}</td>
+                        <td class="py-3 px-3 text-xs font-mono text-slate-600">${acc.pass}</td>
+                        <td class="py-3 px-3 text-center space-x-1">
+                            <button onclick="resetAccountPassword(${acc.id})" class="text-amber-700 bg-amber-50 px-2.5 py-1 rounded text-xs font-bold border border-amber-200">Reset Password</button>
+                            <button onclick="deleteAccount(${acc.id})" class="text-red-500 bg-red-50 px-2.5 py-1 rounded text-xs font-bold border border-red-200">Hapus</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function resetAccountPassword(id) {
+            const newPass = prompt("Masukkan password baru untuk akun ini:");
+            if(newPass && newPass.trim() !== "") {
+                const acc = state.accounts.find(a => a.id === id);
+                if(acc) {
+                    acc.pass = newPass.trim();
+                    alert(`Password untuk ${acc.name} berhasil direset!`);
+                    renderAccounts();
+                }
+            }
+        }
+
+        function deleteAccount(id) {
+            if(confirm("Yakin ingin menghapus akun ini dari sistem?")) {
+                state.accounts = state.accounts.filter(a => a.id !== id);
+                renderAccounts();
+                alert("Akun berhasil dihapus.");
+            }
+        }
+
+        function formatRoleName(role) {
+            if(role === 'admin1') return "Super Admin BPVP";
+            if(role === 'admin2') return "Admin 2 (Dinas)";
+            if(role === 'admin3') return "Admin 3 (Perusahaan)";
+            return role;
+        }
+
+        function renderTrainings() {
+            const list = document.getElementById('training-list');
+            const selectBox = document.getElementById('reg-pelatihan');
+            
+            if(list) list.innerHTML = ''; 
+            if(selectBox) selectBox.innerHTML = ''; 
+            
+            state.trainings.forEach(t => {
+                if(list) {
+                    list.innerHTML += `
+                        <div onclick="openTrainingDetail(${t.id})" class="bg-white rounded-2xl elegant-shadow border border-slate-200 overflow-hidden hover-lift flex flex-col cursor-pointer group">
+                            <div class="h-40 w-full overflow-hidden relative bg-slate-900">
+                                <img src="${t.image}" alt="${t.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                                <div class="absolute top-2 right-2 bg-blue-900/90 text-white px-2.5 py-0.5 rounded-full text-[11px] font-bold">${t.duration}</div>
+                            </div>
+                            <div class="p-5 flex-grow flex flex-col justify-between">
+                                <div>
+                                    <h3 class="font-black text-base mb-1 text-slate-900 group-hover:text-blue-800 transition">${t.name}</h3>
+                                    <p class="text-[11px] font-semibold text-blue-700 mb-1"><i class="fa-solid fa-location-dot mr-1"></i> ${t.location}</p>
+                                    <p class="text-xs text-slate-600 line-clamp-2">${t.desc}</p>
+                                </div>
+                                <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-blue-900">
+                                    <span>Detail Pelatihan</span>
+                                    <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition"></i>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                if(selectBox) selectBox.innerHTML += `<option value="${t.name}">${t.name}</option>`;
+            });
+            renderAdminTrainingsTable();
+            renderDinasDropdowns();
+        }
+
+        function renderAdminTrainingsTable() {
+            const tbody = document.getElementById('admin1-trainings-table');
+            const badge = document.getElementById('count-trainings-badge');
+            if(!tbody) return;
+
+            tbody.innerHTML = '';
+            if(badge) badge.innerText = state.trainings.length;
+
+            if(state.trainings.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-slate-400 italic">Belum ada data pelatihan.</td></tr>`;
+                return;
+            }
+
+            state.trainings.forEach(t => {
+                tbody.innerHTML += `
+                    <tr class="border-b border-slate-200 hover:bg-slate-50">
+                        <td class="py-3 px-3 font-bold text-slate-800">${t.name}<br><span class="text-xs text-blue-700 font-normal">Durasi: ${t.duration}</span></td>
+                        <td class="py-3 px-3 text-xs text-slate-600">${t.location}</td>
+                        <td class="py-3 px-3 text-xs text-slate-400">${t.uploadDate}</td>
+                        <td class="py-3 px-3 text-center space-x-1">
+                            <button onclick="editTraining(${t.id})" class="text-blue-600 bg-blue-50 px-2 py-1 rounded text-xs font-bold border border-blue-200">Edit</button>
+                            <button onclick="deleteData('trainings', ${t.id})" class="text-red-500 bg-red-50 px-2 py-1 rounded text-xs font-bold border border-red-200">Hapus</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function editTraining(id) {
+            const t = state.trainings.find(item => item.id === id);
+            if(!t) return;
+            document.getElementById('t-edit-id').value = t.id;
+            document.getElementById('t-name').value = t.name;
+            document.getElementById('t-duration').value = t.duration;
+            document.getElementById('t-location').value = t.location;
+            document.getElementById('t-image').value = t.image;
+            document.getElementById('t-desc').value = t.desc;
+
+            document.getElementById('form-training-title').innerHTML = `<i class="fa-solid fa-pen-to-square mr-2 text-blue-700"></i>Edit Informasi Pelatihan`;
+            document.getElementById('btn-submit-training').innerText = "Perbarui Pelatihan";
+            document.getElementById('btn-cancel-edit').classList.remove('hidden');
+            document.getElementById('t-name').focus();
+        }
+
+        function resetTrainingForm() {
+            document.getElementById('t-edit-id').value = '';
+            document.querySelector('#tab-trainings form').reset();
+            document.getElementById('form-training-title').innerHTML = `<i class="fa-solid fa-circle-plus mr-2 text-blue-700"></i>Buka Pelatihan Baru`;
+            document.getElementById('btn-submit-training').innerText = "Simpan Pelatihan";
+            document.getElementById('btn-cancel-edit').classList.add('hidden');
+        }
+
+        function saveTrainingData(e) {
+            e.preventDefault();
+            const editId = document.getElementById('t-edit-id').value;
+            const name = document.getElementById('t-name').value;
+            const duration = document.getElementById('t-duration').value;
+            const location = document.getElementById('t-location').value;
+            const image = document.getElementById('t-image').value;
+            const desc = document.getElementById('t-desc').value;
+
+            if(editId) {
+                const t = state.trainings.find(item => item.id == editId);
+                if(t) {
+                    t.name = name;
+                    t.duration = duration;
+                    t.location = location;
+                    t.image = image;
+                    t.desc = desc;
+                    alert("Informasi pelatihan berhasil diperbarui!");
+                }
+            } else {
+                state.trainings.push({
+                    id: Date.now(),
+                    name: name,
+                    duration: duration,
+                    location: location,
+                    image: image,
+                    desc: desc,
+                    uploadedBy: state.currentUser ? state.currentUser.name : "Admin",
+                    uploadDate: getCurrentDateTime()
+                });
+                alert("Pelatihan baru berhasil dipublikasikan!");
+            }
+            resetTrainingForm();
+            renderTrainings();
+        }
+
+        function openTrainingDetail(id) {
+            const t = state.trainings.find(item => item.id === id);
+            if(!t) return;
+            document.getElementById('modal-train-img').src = t.image;
+            document.getElementById('modal-train-title').innerText = t.name;
+            document.getElementById('modal-train-duration').innerText = t.duration;
+            document.getElementById('modal-train-location').innerText = t.location;
+            document.getElementById('modal-train-date').innerText = `Diupload oleh ${t.uploadedBy} pada ${t.uploadDate}`;
+            document.getElementById('modal-train-desc').innerText = t.desc;
+            toggleModal('training-modal');
+        }
+
+        function gotoRegistrationFromModal() {
+            toggleModal('training-modal');
+            switchTab('panel-2', document.querySelectorAll('.tab-btn')[1]);
+        }
+
+        function renderJobs() {
+            const list = document.getElementById('job-list');
+            const admin3Table = document.getElementById('admin3-job-table');
+            
+            if(list) list.innerHTML = ''; 
+            if(admin3Table) admin3Table.innerHTML = '';
+            
+            state.jobs.forEach(j => {
+                if(list) {
+                    list.innerHTML += `
+                        <div class="bg-white p-6 rounded-2xl elegant-shadow border-l-8 border-blue-900 flex flex-col sm:flex-row justify-between items-start sm:items-center hover-lift gap-4">
+                            <div class="space-y-1">
+                                <span class="bg-blue-100 text-blue-900 text-[11px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider inline-block">
+                                    <i class="fa-solid fa-building mr-1"></i> ${j.company}
+                                </span>
+                                <h3 class="font-black text-xl text-slate-900">${j.position}</h3>
+                                <p class="text-xs font-semibold text-slate-600"><i class="fa-solid fa-location-dot text-blue-700 mr-1"></i> ${j.lokasi}</p>
+                                <p class="text-xs text-slate-600 line-clamp-1"><strong>Skill:</strong> ${j.skill}</p>
+                            </div>
+                            <button onclick="openJobDetailModal(${j.id})" class="bg-blue-900 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-blue-800 transition whitespace-nowrap shadow-md uppercase tracking-wider text-xs">
+                                Detail & Lamar
+                            </button>
+                        </div>
+                    `;
+                }
+
+                if(state.currentUser && state.currentUser.role === 'admin3' && j.company === state.currentUser.name) {
+                    if(admin3Table) {
+                        admin3Table.innerHTML += `
+                            <tr class="border-b border-slate-200 hover:bg-slate-50">
+                                <td class="py-3 px-3 font-bold text-slate-800">
+                                    ${j.position}<br><span class="text-xs font-normal text-slate-500">${j.lokasi}</span>
+                                </td>
+                                <td class="py-3 px-3 text-slate-600 text-xs">
+                                    <strong>Pendidikan:</strong> ${j.pendidikan}<br><strong>Umur:</strong> ${j.umur}
+                                </td>
+                                <td class="py-3 px-3 text-slate-400 text-xs">${j.uploadDate}</td>
+                                <td class="py-3 px-3 text-center">
+                                    <button onclick="deleteData('jobs', ${j.id})" class="text-red-500 bg-red-50 px-2 py-1 rounded text-xs font-bold border border-red-200">Hapus</button>
+                                </td>
+                            </tr>
+                        `;
+                    }
+                }
+            });
+        }
+
+        function openJobDetailModal(jobId) {
+            const j = state.jobs.find(item => item.id === jobId);
+            if(!j) return;
+            document.getElementById('apply-job-id').value = j.id;
+            document.getElementById('modal-job-comp').innerText = j.company;
+            document.getElementById('modal-job-pos').innerText = j.position;
+            document.getElementById('modal-job-loc').innerHTML = `<i class="fa-solid fa-location-dot mr-1"></i> ${j.lokasi}`;
+            document.getElementById('modal-job-date').innerText = `Diupload pada: ${j.uploadDate}`;
+            document.getElementById('modal-job-edu').innerText = j.pendidikan;
+            document.getElementById('modal-job-age').innerText = j.umur;
+            document.getElementById('modal-job-ket').innerText = j.ket;
+            document.getElementById('modal-job-desc').innerText = j.skill;
+            renderDinasDropdowns();
+            toggleModal('job-detail-modal');
+        }
+
+        function submitRegistration(e) {
+            e.preventDefault();
+            const newData = {
+                id: Date.now(),
+                nama: document.getElementById('reg-nama').value,
+                nik: document.getElementById('reg-nik').value,
+                umur: document.getElementById('reg-umur').value,
+                hp: document.getElementById('reg-hp').value,
+                kab: document.getElementById('reg-kabupaten').value,
+                dinas: document.getElementById('reg-dinas-tujuan').value,
+                alamat: document.getElementById('reg-alamat').value,
+                pengalaman: document.getElementById('reg-pengalaman').value,
+                skill: document.getElementById('reg-skill').value,
+                pelatihan: document.getElementById('reg-pelatihan').value,
+                uploadDate: getCurrentDateTime()
+            };
+            state.registrations.push(newData);
+            alert(`Pendaftaran berhasil dikirimkan ke ${newData.dinas}!`);
+            e.target.reset();
+        }
+
+        function submitJobApplication(e) {
+            e.preventDefault();
+            const jobId = parseInt(document.getElementById('apply-job-id').value);
+            const job = state.jobs.find(j => j.id === jobId);
+            const name = document.getElementById('apply-name').value;
+            const hp = document.getElementById('apply-hp').value;
+            const selectedDinasRadio = document.querySelector('input[name="selected_dinas"]:checked');
+
+            if(!selectedDinasRadio) {
+                alert("Silakan pilih Dinas penyalur.");
+                return;
+            }
+
+            const chosenDinas = selectedDinasRadio.value;
+
+            state.jobApplications.push({
+                id: Date.now(),
+                jobId: jobId,
+                jobTitle: job.position,
+                company: job.company,
+                pelamarNama: name,
+                pelamarHp: hp,
+                dinasTujuan: chosenDinas,
+                tanggal: getCurrentDateTime(),
+                status: 'Menunggu Pengecekan Dinas'
+            });
+
+            alert(`Lamaran berhasil dikirimkan ke ${chosenDinas}!`);
+            toggleModal('job-detail-modal');
+            e.target.reset();
+        }
+
+        function renderRegistrations() {
+            const tbody = document.getElementById('registrant-table-body');
+            const subtitle = document.getElementById('admin2-subtitle');
+            if(!tbody) return;
+            
+            tbody.innerHTML = '';
+            const filteredRegistrations = state.registrations.filter(r => r.dinas === state.currentUser.name);
+            
+            if(subtitle) {
+                subtitle.innerText = `Pendaftar pelatihan untuk ${state.currentUser.name}.`;
+            }
+
+            if(filteredRegistrations.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-slate-400 italic">Belum ada data pendaftar.</td></tr>`;
+                return;
+            }
+
+            filteredRegistrations.forEach(r => {
+                tbody.innerHTML += `
+                    <tr class="border-b border-slate-200 hover:bg-slate-50">
+                        <td class="py-3 px-4 font-bold text-slate-800">${r.nama}<br><span class="text-xs text-slate-500 font-normal">NIK: ${r.nik}</span></td>
+                        <td class="py-3 px-4 text-xs text-slate-600">${r.umur} Thn<br><span class="text-blue-700">${r.hp}</span></td>
+                        <td class="py-3 px-4 text-xs text-slate-600 font-bold">${r.kab}</td>
+                        <td class="py-3 px-4 text-xs text-slate-600">${r.skill}</td>
+                        <td class="py-3 px-4 text-blue-900 font-bold text-xs">${r.pelatihan}</td>
+                        <td class="py-3 px-4 text-center space-x-1">
+                            <button onclick="alert('Terverifikasi!');" class="bg-emerald-50 text-emerald-700 px-2 py-1 rounded text-xs font-bold border border-emerald-200">Verifikasi</button>
+                            <button onclick="deleteData('registrations', ${r.id})" class="bg-red-50 text-red-600 px-2 py-1 rounded text-xs font-bold border border-red-200">Tolak</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            renderAdmin2JobApps();
+        }
+
+        function renderAdmin2JobApps() {
+            const tbody = document.getElementById('dinas-jobapp-table');
+            const badge = document.getElementById('count-jobapp-badge');
+            if(!tbody) return;
+
+            tbody.innerHTML = '';
+            const myApps = state.jobApplications.filter(a => a.dinasTujuan === state.currentUser.name);
+            if(badge) badge.innerText = myApps.length;
+
+            if(myApps.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-slate-400 italic">Belum ada lamaran pekerjaan.</td></tr>`;
+                return;
+            }
+
+            myApps.forEach(app => {
+                const actionBtn = app.status === 'Menunggu Pengecekan Dinas' 
+                    ? `<button onclick="forwardToCompany(${app.id})" class="bg-blue-900 text-white px-2.5 py-1 rounded text-xs font-bold">Teruskan</button>` 
+                    : `<span class="text-emerald-700 font-bold text-xs">Diteruskan</span>`;
+
+                tbody.innerHTML += `
+                    <tr class="border-b border-slate-200 hover:bg-slate-50">
+                        <td class="py-3 px-4 font-bold text-slate-800">${app.pelamarNama}<br><span class="text-xs text-blue-700">${app.pelamarHp}</span></td>
+                        <td class="py-3 px-4 font-semibold text-slate-800">${app.jobTitle}</td>
+                        <td class="py-3 px-4 text-xs font-bold text-slate-600">${app.company}</td>
+                        <td class="py-3 px-4 text-xs text-slate-500">${app.tanggal}</td>
+                        <td class="py-3 px-4 text-center">${actionBtn}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function forwardToCompany(appId) {
+            const app = state.jobApplications.find(a => a.id === appId);
+            if(app) {
+                app.status = 'Diteruskan ke Perusahaan';
+                alert(`Lamaran ${app.pelamarNama} berhasil diteruskan ke perusahaan!`);
+                renderAdmin2JobApps();
+                renderAdmin3Applicants();
+            }
+        }
+
+        function renderAdmin3Applicants() {
+            const tbody = document.getElementById('admin3-applicants-table');
+            if(!tbody) return;
+
+            tbody.innerHTML = '';
+            if(!state.currentUser || state.currentUser.role !== 'admin3') return;
+
+            const myCompanyApps = state.jobApplications.filter(a => a.company === state.currentUser.name && a.status === 'Diteruskan ke Perusahaan');
+
+            if(myCompanyApps.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-slate-400 italic">Belum ada pelamar rujukan.</td></tr>`;
+                return;
+            }
+
+            myCompanyApps.forEach(app => {
+                tbody.innerHTML += `
+                    <tr class="border-b border-slate-200 hover:bg-slate-50">
+                        <td class="py-3 px-3 font-bold text-slate-800">${app.pelamarNama}<br><span class="text-xs text-blue-700">${app.pelamarHp}</span></td>
+                        <td class="py-3 px-3 font-semibold text-slate-800">${app.jobTitle}</td>
+                        <td class="py-3 px-3 text-xs font-bold text-slate-600">${app.dinasTujuan}</td>
+                        <td class="py-3 px-3 text-center"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded text-xs font-bold">Valid</span></td>
+                    </tr>
+                `;
+            });
+        }
+
+        function submitAlumni(e) {
+            e.preventDefault();
+            state.alumni.push({
+                id: Date.now(),
+                nama: document.getElementById('alumni-nama').value,
+                hp: document.getElementById('alumni-hp').value,
+                jk: document.getElementById('alumni-jk').value,
+                pelatihan: document.getElementById('alumni-pelatihan').value,
+                lokasiKerja: document.getElementById('alumni-lokasi-kerja').value,
+                jabatan: document.getElementById('alumni-jabatan').value,
+                alamat: document.getElementById('alumni-alamat').value,
+                uploadDate: getCurrentDateTime()
+            });
+            alert("Data alumni berhasil dikirimkan!");
+            e.target.reset();
+            renderAlumniTable();
+        }
+
+        function renderAlumniTable() {
+            const tbody = document.getElementById('admin1-alumni-table');
+            const badge = document.getElementById('count-alumni-badge');
+            if(!tbody) return;
+
+            tbody.innerHTML = '';
+            if(badge) badge.innerText = state.alumni.length;
+
+            if(state.alumni.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-slate-400 italic">Belum ada data alumni.</td></tr>`;
+                return;
+            }
+
+            state.alumni.forEach(a => {
+                tbody.innerHTML += `
+                    <tr class="border-b border-slate-200 hover:bg-slate-50">
+                        <td class="py-3 px-4 font-bold text-slate-800">${a.nama}</td>
+                        <td class="py-3 px-4 text-xs text-slate-600"><span class="text-blue-700 font-bold">${a.hp}</span><br>${a.alamat}</td>
+                        <td class="py-3 px-4 text-xs font-semibold text-slate-800">${a.pelatihan}</td>
+                        <td class="py-3 px-4 text-xs text-slate-600">${a.lokasiKerja} (${a.jabatan})</td>
+                        <td class="py-3 px-4 text-xs text-slate-400">${a.uploadDate}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function submitPengaduan(e) {
+            e.preventDefault();
+            state.pengaduan.push({
+                id: Date.now(),
+                kategori: document.getElementById('adu-kategori').value,
+                judul: document.getElementById('adu-judul').value,
+                tanggal: document.getElementById('adu-tanggal').value,
+                lokasi: document.getElementById('adu-lokasi').value,
+                unit: document.getElementById('adu-unit').value,
+                kronologi: document.getElementById('adu-kronologi').value,
+                saran: document.getElementById('adu-saran').value,
+                uploadDate: getCurrentDateTime()
+            });
+            alert("Pengaduan berhasil dikirimkan!");
+            e.target.reset();
+            renderPengaduanTable();
+        }
+
+        function renderPengaduanTable() {
+            const tbody = document.getElementById('admin1-pengaduan-table');
+            const badge = document.getElementById('count-adu-badge');
+            if(!tbody) return;
+
+            tbody.innerHTML = '';
+            if(badge) badge.innerText = state.pengaduan.length;
+
+            if(state.pengaduan.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-slate-400 italic">Belum ada pengaduan.</td></tr>`;
+                return;
+            }
+
+            state.pengaduan.forEach(p => {
+                tbody.innerHTML += `
+                    <tr class="border-b border-slate-200 hover:bg-slate-50">
+                        <td class="py-3 px-4 text-xs">
+                            <span class="bg-blue-100 text-blue-900 font-bold px-2 py-0.5 rounded">${p.kategori}</span><br>
+                            <strong class="text-slate-900 text-sm mt-1 block">${p.judul}</strong>
+                        </td>
+                        <td class="py-3 px-4 text-xs text-slate-600">${p.tanggal} (${p.lokasi})<br>Unit: ${p.unit}</td>
+                        <td class="py-3 px-4 text-xs text-slate-600">${p.kronologi}</td>
+                        <td class="py-3 px-4 text-xs text-slate-400">${p.uploadDate}</td>
+                        <td class="py-3 px-4 text-center">
+                            <button onclick="deleteData('pengaduan', ${p.id})" class="text-red-500 bg-red-50 px-2 py-1 rounded text-xs font-bold border border-red-200">Hapus</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function openProposeTrainingModal() {
+            renderDinasDropdowns();
+            toggleModal('propose-training-modal');
+        }
+
+        function submitTrainingProposal(e) {
+            e.preventDefault();
+            state.proposals.push({
+                id: Date.now(),
+                dinas: state.currentUser.name,
+                trainingName: document.getElementById('prop-training-name').value,
+                count: document.getElementById('prop-count').value,
+                note: document.getElementById('prop-note').value,
+                uploadDate: getCurrentDateTime()
+            });
+            alert("Pengajuan berhasil dikirimkan!");
+            toggleModal('propose-training-modal');
+            e.target.reset();
+        }
+
+        function renderProposals() {
+            const tbody = document.getElementById('admin1-proposals-table');
+            if(!tbody) return;
+            
+            tbody.innerHTML = '';
+            if(state.proposals.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-slate-400 italic">Belum ada pengajuan.</td></tr>`;
+                return;
+            }
+
+            state.proposals.forEach(p => {
+                tbody.innerHTML += `
+                    <tr class="border-b border-slate-200 hover:bg-slate-50">
+                        <td class="py-3 px-3 font-bold text-slate-800">${p.dinas}</td>
+                        <td class="py-3 px-3 text-blue-900 font-bold">${p.trainingName}</td>
+                        <td class="py-3 px-3 text-slate-600 font-semibold">${p.count} Orang</td>
+                        <td class="py-3 px-3 text-slate-600 text-xs">${p.note}</td>
+                        <td class="py-3 px-3 text-center">
+                            <button onclick="alert('Disetujui!'); deleteData('proposals', ${p.id});" class="bg-blue-900 text-white px-2.5 py-1 rounded text-xs font-bold">Setujui</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function addJob(e) {
+            e.preventDefault();
+            state.jobs.push({
+                id: Date.now(),
+                company: state.currentUser.name,
+                position: document.getElementById('j-position').value,
+                lokasi: document.getElementById('j-lokasi').value,
+                pendidikan: document.getElementById('j-pendidikan').value,
+                umur: document.getElementById('j-umur').value,
+                ket: document.getElementById('j-ket').value,
+                skill: document.getElementById('j-skill').value,
+                uploadDate: getCurrentDateTime()
+            });
+            e.target.reset();
+            document.getElementById('j-company').value = state.currentUser.name;
+            renderJobs();
+            alert("Lowongan berhasil dipublikasikan!");
+        }
+
+        function addAccount(e) {
+            e.preventDefault();
+            state.accounts.push({
+                id: Date.now(),
+                name: document.getElementById('acc-name').value,
+                role: document.getElementById('acc-role').value,
+                pass: document.getElementById('acc-pass').value
+            });
+            e.target.reset();
+            renderAccounts();
+            alert("Akun baru berhasil dibuat!");
+        }
+
+        function deleteData(collection, id) {
+            if(confirm("Yakin ingin menghapus data ini?")) {
+                state[collection] = state[collection].filter(item => item.id !== id);
+                if(collection === 'trainings') renderTrainings();
+                if(collection === 'registrations') renderRegistrations();
+                if(collection === 'jobs') renderJobs();
+                if(collection === 'accounts') renderAccounts();
+                if(collection === 'proposals') renderProposals();
+                if(collection === 'pengaduan') renderPengaduanTable();
+            }
+        }
+
+        function switchTab(panelId, btnElement) {
+            document.querySelectorAll('#public-area .panel-content').forEach(el => el.classList.add('hidden-panel'));
+            document.getElementById(panelId).classList.remove('hidden-panel');
+            
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('text-blue-900', 'bg-blue-50', 'border-blue-900', 'shadow-sm', 'font-bold');
+                btn.classList.add('text-slate-600', 'border-transparent', 'font-semibold');
+            });
+            btnElement.classList.remove('text-slate-600', 'border-transparent', 'font-semibold');
+            btnElement.classList.add('text-blue-900', 'bg-blue-50', 'border-blue-900', 'shadow-sm', 'font-bold');
+
+            if(panelId === 'panel-1') renderPublicChart();
+        }
+
+        function switchAdmin1Tab(tabId, btn) {
+            document.querySelectorAll('.admin1-tab-content').forEach(el => el.classList.add('hidden-panel'));
+            document.getElementById(tabId).classList.remove('hidden-panel');
+            
+            document.querySelectorAll('.admin1-tab-btn').forEach(b => {
+                b.classList.remove('text-blue-900', 'border-blue-900', 'font-bold');
+                b.classList.add('text-slate-500', 'border-transparent', 'font-semibold');
+            });
+            btn.classList.remove('text-slate-500', 'border-transparent', 'font-semibold');
+            btn.classList.add('text-blue-900', 'border-blue-900', 'font-bold');
+        }
+
+        function switchAdmin2Tab(tabId, btn) {
+            document.querySelectorAll('.admin2-tab-content').forEach(el => el.classList.add('hidden-panel'));
+            document.getElementById(tabId).classList.remove('hidden-panel');
+            
+            document.querySelectorAll('.admin2-tab-btn').forEach(b => {
+                b.classList.remove('text-blue-900', 'border-blue-900', 'font-bold');
+                b.classList.add('text-slate-500', 'border-transparent', 'font-semibold');
+            });
+            btn.classList.remove('text-slate-500', 'border-transparent', 'font-semibold');
+            btn.classList.add('text-blue-900', 'border-blue-900', 'font-bold');
+        }
+
+        function toggleModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if(modal.classList.contains('hidden')) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            } else {
+                modal.classList.remove('flex');
+                modal.classList.add('hidden');
+            }
+        }
+
+        function processLogin() {
+            const accId = parseInt(document.getElementById('login-account-select').value);
+            const passInput = document.getElementById('login-password-input').value;
+            const acc = state.accounts.find(a => a.id === accId);
+
+            if(acc && acc.pass === passInput) {
+                state.currentUser = acc;
+                toggleModal('login-modal');
+                document.getElementById('public-area').classList.add('hidden-panel');
+                document.getElementById('admin-area').classList.remove('hidden-panel');
+                document.getElementById('btn-login-modal').classList.add('hidden');
+                document.getElementById('btn-logout').classList.remove('hidden');
+                document.getElementById('user-role-display').innerText = `${acc.name} (${formatRoleName(acc.role)})`;
+
+                document.getElementById('admin1-dashboard').classList.add('hidden-panel');
+                document.getElementById('admin2-dashboard').classList.add('hidden-panel');
+                document.getElementById('admin3-dashboard').classList.add('hidden-panel');
+
+                if(acc.role === 'admin1') {
+                    document.getElementById('admin1-dashboard').classList.remove('hidden-panel');
+                    renderProposals();
+                    renderAdminStatTable();
+                    renderAlumniTable();
+                    renderPengaduanTable();
+                    renderAdminAccountsTable();
+                    renderAdminTrainingsTable();
+                } else if(acc.role === 'admin2') {
+                    document.getElementById('admin2-dashboard').classList.remove('hidden-panel');
+                    renderRegistrations();
+                } else if(acc.role === 'admin3') {
+                    document.getElementById('admin3-dashboard').classList.remove('hidden-panel');
+                    document.getElementById('j-company').value = acc.name;
+                    renderJobs();
+                    renderAdmin3Applicants();
+                }
+                document.getElementById('login-password-input').value = '';
+            } else {
+                alert("Kata sandi salah atau akun tidak valid!");
+            }
+        }
+
+        function logout() {
+            state.currentUser = null;
+            document.getElementById('admin-area').classList.add('hidden-panel');
+            document.getElementById('public-area').classList.remove('hidden-panel');
+            document.getElementById('btn-login-modal').classList.remove('hidden');
+            document.getElementById('btn-logout').classList.add('hidden');
+            document.getElementById('user-role-display').innerText = '';
+            switchTab('panel-1', document.querySelectorAll('.tab-btn')[0]);
+        }
+    </script>
+</body>
+</html>
